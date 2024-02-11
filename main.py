@@ -1,5 +1,7 @@
 import requests
+import sys
 
-result = requests.get("https://finance.yahoo.com/quote/AAPL")
+result = requests.get(sys.argv[1])
 
 print(result.text)
+print(sys.argv)
