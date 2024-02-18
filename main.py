@@ -18,5 +18,14 @@ print(f"number of tables: {len(tables)}")
 for index, table in enumerate(tables):
     print(f"{index}: {table.get_text()}")
     print("-----")
+    
+div = soup.find('div', {'data-test': 'left-summary-table'})
+table = div.find('table')
+print(f"left table: {table.get_text()}")
+
+div = soup.find('div', {'data-test': 'right-summary-table'})
+table = div.find('table')
+print(f"right table: {table.get_text()}")
+
 
 print(sys.argv)
