@@ -11,21 +11,16 @@ h1_tags = soup.find_all('h1')
 for tag in h1_tags:
     print(tag.get_text())
     
-tables = soup.find_all('table')
+ul_list = soup.find_all('ul')
 
-print(f"number of tables: {len(tables)}")
+print(f"number of items: {len(ul_list)}")
 
-for index, table in enumerate(tables):
-    print(f"{index}: {table.get_text()}")
+for index, ul_element in enumerate(ul_list):
+    print(f"{index}: {ul_element.get_text()}")
     print("-----")
     
-div = soup.find('div', {'data-test': 'left-summary-table'})
-table = div.find('table')
-print(f"left table: {table.get_text()}")
-
-div = soup.find('div', {'data-test': 'right-summary-table'})
-table = div.find('table')
-print(f"right table: {table.get_text()}")
-
+parent_div = soup.find('div', {'data-testid': 'quote-statistics'})
+stats_ul = parent_div.find('ul')
+print(f"stats: {stats_ul.get_text()}")
 
 print(sys.argv)
