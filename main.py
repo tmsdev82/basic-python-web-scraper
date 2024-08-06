@@ -1,50 +1,54 @@
+import click
 from datetime import datetime, timezone
 import json
 import os
 import requests
-import sys
 
 from bs4 import BeautifulSoup
 
-result = requests.get(sys.argv[1])
 
-soup = BeautifulSoup(result.text, "html.parser")
+@click.command()
+@click.argument("urls", nargs=-1)
+@click.option(
+    "--output", default="data.json", help="The file to save the scraped data to."
+)
+def scrape_data_to_file(urls, output):
+    scraped_data = []
 
-h1_tags = soup.find_all("h1")
+    if os.path.exists(output):
+        with open(output, "r") as file:
+            scraped_data = json.load(file)
 
-for tag in h1_tags:
-    print(tag.get_text())
+    for url in urls:
+        result = requests.get(url)
+        soup = BeautifulSoup(result.text, "html.parser")
 
-ul_list = soup.find_all("ul")
+        parent_div = soup.find("div", {"data-testid": "quote-statistics"})
+        if not parent_div:
+            print(f"No statistics div found for URL: {url}")
+            continue
 
-print(f"number of items: {len(ul_list)}")
+        stats_ul = parent_div.find("ul")
+        if not stats_ul:
+            print(f"No statistics found for URL: {url}")
+            continue
 
-for index, ul_element in enumerate(ul_list):
-    print(f"{index}: {ul_element.get_text()}")
-    print("-----")
+        list_items = stats_ul.find_all("li")
+        data = {}
+        for item in list_items:
+            columns = item.find_all("span")
+            data[columns[0].get_text()] = columns[1].get_text()
 
-parent_div = soup.find("div", {"data-testid": "quote-statistics"})
-stats_ul = parent_div.find("ul")
+        data["timestamp"] = str(datetime.now(timezone.utc))
+        data["url"] = url
+        data["ticker"] = url.split("/")[-1]
+        print(json.dumps(data, indent=2))
 
-list_items = stats_ul.find_all("li")
-data = {}
-for item in list_items:
-    columns = item.find_all("span")
-    data[columns[0].get_text()] = columns[1].get_text()
+        scraped_data.append(data)
 
-data["timestamp"] = str(datetime.now(timezone.utc))
-data["url"] = sys.argv[1]
-data["ticker"] = sys.argv[1].split("/")[-1]
-print(json.dumps(data, indent=2))
+    with open(output, "w") as file:
+        json.dump(scraped_data, file, indent=2)
 
-scraped_data = []
-data_file = "data.json"
-if os.path.exists(data_file):
-    with open(data_file, "r") as file:
-        scraped_data = json.load(file)
 
-scraped_data.append(data)
-with open(data_file, "w") as file:
-    json.dump(scraped_data, file, indent=2)
-
-print(sys.argv)
+if __name__ == "__main__":
+    scrape_data_to_file()
