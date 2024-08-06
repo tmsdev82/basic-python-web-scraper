@@ -33,6 +33,8 @@ for item in list_items:
     data[columns[0].get_text()] = columns[1].get_text()
 
 data["timestamp"] = str(datetime.now(timezone.utc))
+data["url"] = sys.argv[1]
+data["ticker"] = sys.argv[1].split("/")[-1]
 print(json.dumps(data, indent=2))
 
 scraped_data = []
@@ -44,6 +46,5 @@ if os.path.exists(data_file):
 scraped_data.append(data)
 with open(data_file, "w") as file:
     json.dump(scraped_data, file, indent=2)
-
 
 print(sys.argv)
