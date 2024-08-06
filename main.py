@@ -21,6 +21,10 @@ for index, ul_element in enumerate(ul_list):
     
 parent_div = soup.find('div', {'data-testid': 'quote-statistics'})
 stats_ul = parent_div.find('ul')
-print(f"stats: {stats_ul.get_text()}")
+
+list_items = stats_ul.find_all('li')
+for item in list_items:
+    columns = item.find_all('span')    
+    print(f"{columns[0].get_text()}: {columns[1].get_text()}")
 
 print(sys.argv)
